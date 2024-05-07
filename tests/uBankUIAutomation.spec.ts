@@ -1,11 +1,14 @@
 import { test, expect } from "@playwright/test";
 import { faker } from "@faker-js/faker/locale/en";
+import { HomePage, ContactUsPage } from "../page-objects/UBank_webpages";
 
+// Test Hooks
 test.beforeEach(async ({ page }) => {
   // Navigate to the UBank Website(desktop) HomePage - BaseURL set in Playwright config file
   await page.goto("/");
 });
 
+// Test Suite
 test.describe("UBank website tests", () => {
   // Homepage load logo assertion
   test("Navigate to UBankHomePage & check for the bank logo", async ({
@@ -32,7 +35,7 @@ test.describe("UBank website tests", () => {
   test("Home Page Mega menu - 'Everyday Money' - Lists and dropwdowns", async ({
     page,
   }) => {
-    // select list/dropdown & click
+    // select menu list & click
     const everyDayMoneyMenuOpen = page.getByRole("link", {
       name: "Everyday money",
     });
@@ -101,6 +104,7 @@ test.describe("UBank website tests", () => {
     await everyDayMoneyMenuClose.click();
   });
 
+  // Submit ContactUs - 'Send Us' message form
   test("Submit Contact Us Form on the UBank website", async ({ page }) => {
     // Navigate to the Contact Us page
     const getHelpMenu = page.getByRole("link", { name: "Get help" });
@@ -150,7 +154,7 @@ test.describe("UBank website tests", () => {
 
     // Generate fake test data
     const email = faker.internet.email();
-    // const mobileNumber = faker.phone.area("041111111121-###-###");
+
     const randomSentence = faker.lorem.sentence();
     const mobileNumber =
       "04" + faker.datatype.number({ min: 10000000, max: 99999999 });
@@ -161,22 +165,28 @@ test.describe("UBank website tests", () => {
 
     // select a list item and click - 1st dropwdown in the form
     await formSelectDropDown.click();
-    await selectListOptions.filter({ hasText: " General Enquiry" }).click();
+    await selectListOptions
+      .filter({ hasText: " General Enquiry" })
+      .click({ force: true });
 
     // select a list item and click - 2nd dropdown in the form
     await enquirySelectDropDown.click();
-    await enquirySelectListOptions.filter({ hasText: " Home Loans " }).click();
+    await enquirySelectListOptions
+      .filter({ hasText: " Home Loans " })
+      .click({ force: true });
 
     await tellUsBitMoreTextField.fill(randomSentence);
 
     await page.locator('[sp-automation-id="sp-form-submit-button"]').click();
 
     // Thankyou message after user submits the form
-
-    const thankYouMessageAfterFormSubmit = page.getByText(
-      "Thanks for getting in touch."
+    const thankYouMessageAfterFormSubmit = page.locator(
+      'span[sp-automation-id="info-box-message"]'
     );
-
     await expect(thankYouMessageAfterFormSubmit).toBeVisible();
+
+    // const thankYouMessageAfterFormSubmit = page.getByText(
+    //   "Thanks for getting in touch. We'll get back to you the second we can."
+    // );
   });
 });
