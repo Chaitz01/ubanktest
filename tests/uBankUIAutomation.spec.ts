@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { faker } from "@faker-js/faker/locale/en";
 
 test.beforeEach(async ({ page }) => {
   // Navigate to the UBank Website(desktop) HomePage - BaseURL set in Playwright config file
@@ -112,12 +113,68 @@ test.describe("UBank website tests", () => {
     await expect(page.locator("h1")).toContainText("Contact us");
     await expect(page).toHaveURL(/.*contact-us/);
 
+    // Click on 'SendUsMessage' button on ContactUs page to open the form and submit
     const sendUsMessage = page.getByLabel("Send us a message");
     const sendUsMessagePageText = page.getByText("Get in touch about current");
     await sendUsMessage.click();
+
     // Check that the 'Send us a message' page is displayed
     await expect(sendUsMessagePageText).toBeVisible();
     await expect(page).toHaveURL(/.*send-a-message/);
     await expect(page.getByText("Shoot us a message")).toBeVisible();
+    await expect(page.getByText(" What's your email?")).toBeVisible();
+    await expect(page.getByText("What's your mobile number?")).toBeVisible();
+
+    // Select drop down in the form
+    const fillEmailFieldForm = page.getByText(" What's your email?");
+    const fillMobileNumberFieldForm = page.getByText(
+      " What's your mobile number?"
+    );
+    const formSelectDropDown = page.getByLabel("What can we help you with?");
+    const enquirySelectDropDown = page.getByLabel(
+      " Let us know what your enquiry most closely relates to"
+    );
+
+    const tellUsBitMoreTextField = page.getByText(
+      " Tell us a bit more and make sure to let us know the best way to contact you"
+    );
+
+    // Options selector on both dropdowns
+    const selectListOptions = page.locator(
+      '[pw-automation-id="pw-form-section-web-select-option"]'
+    );
+
+    const enquirySelectListOptions = page.locator(
+      '[pw-automation-id="pw-form-section-web-select-option"]'
+    );
+
+    // Generate fake test data
+    const email = faker.internet.email();
+    // const mobileNumber = faker.phone.area("041111111121-###-###");
+    const randomSentence = faker.lorem.sentence();
+    const mobileNumber =
+      "04" + faker.datatype.number({ min: 10000000, max: 99999999 });
+    console.log(mobileNumber);
+
+    await fillEmailFieldForm.fill(email);
+    await fillMobileNumberFieldForm.fill(mobileNumber);
+
+    // select a list item and click - 1st dropwdown in the form
+    await formSelectDropDown.click();
+    await selectListOptions.filter({ hasText: " General Enquiry" }).click();
+
+    // select a list item and click - 2nd dropdown in the form
+    await enquirySelectDropDown.click();
+    await enquirySelectListOptions.filter({ hasText: " Home Loans " }).click();
+
+    await tellUsBitMoreTextField.fill(randomSentence);
+
+    await page.locator('[sp-automation-id="sp-form-submit-button"]').click();
+
+    const thankYouMessageAfterFormSubmit = page.locator(
+      '[sp-automation-id="info-box-message"]'
+    );
+
+    await expect(thankYouMessageAfterFormSubmit).toBeVisible();
   });
 });
