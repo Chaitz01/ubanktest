@@ -171,8 +171,10 @@ test.describe("UBank website tests", () => {
 
     await page.locator('[sp-automation-id="sp-form-submit-button"]').click();
 
-    const thankYouMessageAfterFormSubmit = page.locator(
-      '[sp-automation-id="info-box-message"]'
+    // Thankyou message after user submits the form
+
+    const thankYouMessageAfterFormSubmit = page.getByText(
+      "Thanks for getting in touch."
     );
 
     await expect(thankYouMessageAfterFormSubmit).toBeVisible();
